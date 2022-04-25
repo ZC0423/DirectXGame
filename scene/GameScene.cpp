@@ -17,6 +17,7 @@ void GameScene::Initialize() {
 	debugText_ = DebugText::GetInstance();
 	textureHandle_ = TextureManager::Load("mario.jpg");
 	model_ = Model::Create();
+	
 	std::random_device seed_gen;
 	std::mt19937_64 engine(seed_gen());
 	std::uniform_real_distribution<float> rotDist(0.0f, XM_2PI);
@@ -29,9 +30,13 @@ void GameScene::Initialize() {
 		worldTransform_[i].Initialize();
 	}
 	
-	viewProjection_.eye = {0, 0, -10};
-	viewProjection_.target = {10.0f, 0.0f, 0.0f};
-	viewProjection_.up = {cosf(XM_PI / 4.0f), sinf(XM_PI / 4.0f), 0.0f};
+	//viewProjection_.eye = {};
+	//viewProjection_.target = {};
+	//viewProjection_.up = {};
+	viewProjection_.fovAngleY = XMConvertToRadians(10.0f);
+	viewProjection_.aspectRatio = 1.0f;
+	viewProjection_.nearZ = 52.0f;
+	viewProjection_.farZ = 53.0f;
 	viewProjection_.Initialize();
 
 }
@@ -93,6 +98,30 @@ void GameScene::Update() {
 	  "up:(%f,%f,%f)", viewProjection_.up.x, viewProjection_.up.y, viewProjection_.up.z);
 	
   }
+	{
+		if (input_->PushKey(DIK_UP)) {
+			viewProjection_.fovAngleY += 0.01f;
+			viewProjection_.fovAngleY = min(viewProjection_.fovAngleY, XM_PI);
+		} else if (input_->PushKey(DIK_DOWN)) {
+			viewProjection_.fovAngleY -= 0.01f;
+			viewProjection_.fovAngleY = max(viewProjection_.fovAngleY, 0.01f);
+		}
+		viewProjection_.UpdateMatrix();
+
+		debugText_->SetPos(50, 110);
+		debugText_->Printf(" fovAngleY(Degree) : % f", XMConvertToDegrees(viewProjection_.fovAngleY));
+	}
+	{
+		if (input_->PushKey(DIK_UP)) {
+			viewProjection_.nearZ += 0.1f;
+		} else if (input_->PushKey(DIK_DOWN)) {
+			viewProjection_.nearZ -= 0.1f;
+		}
+		viewProjection_.UpdateMatrix();
+
+		debugText_->SetPos(50, 130);
+		debugText_->Printf(" nearZ : % f",viewProjection_.nearZ);
+	}
 
 	}
 
